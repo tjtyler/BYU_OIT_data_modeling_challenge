@@ -39,3 +39,14 @@ WHERE g.passing = 1
 GROUP BY c.semester
 
 --	6	How does daily enrollment activity during last semester’s open enrollment period compare to the same period the year prior?
+SELECT TO_CHAR(e.date, 'YYYY-MM-DD'), COUNT(*)
+FROM Enrollments e
+JOIN Courses c ON e.course_id = c.course_id
+WHERE c.semester = '<last semester>'
+GROUP BY TO_CHAR(e.date, 'YYYY-MM-DD')
+UNION
+SELECT TO_CHAR(e.date, 'YYYY-MM-DD'), COUNT(*)
+FROM Enrollments e
+JOIN Courses c ON e.course_id = c.course_id
+WHERE c.semester = '<same period the year prior>'
+GROUP BY TO_CHAR(e.date, 'YYYY-MM-DD');
