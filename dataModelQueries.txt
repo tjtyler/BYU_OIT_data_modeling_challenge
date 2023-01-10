@@ -1,52 +1,57 @@
--- SQL QUERIES
-
 —-	1	How many students are enrolled in a course on a specific day?
-SELECT COUNT(*)
-FROM Enrollments e
-JOIN Courses c ON e.course_id = c.course.id
-WEHRE c.meeting_days = '<specific date>';
+SELECT count(*) 
+FROM Enrollments e 
+JOIN AddDropWithdrawal adw ON e.enrollment_id = adw.enrollment_id 
+WHERE date < '2020-10-15' AND course_id = 49 AND action_type = 'A';
+
+-- note: I would then need to minus the count of 'W' and 'D' from this count
 
 —-	2	How many grades does a given instructor need to turn in?
-SELECT COUNT(*)
-FROM Grades g
-JOIN Enrollments e ON g.enrollment_id = e.enrollment_id
-JOIN Courses c ON e.course_id = c.course_id
-JOIN Instructor I ON c.instructor_id = I.instructor_id
-WHERE i.first_name = '<instructor first name>' AND i.last_name = '<instructor last name>';
+select count(*) 
+from Grades g 
+join Enrollments e on g.enrollment_id = e.enrollment_id 
+join Courses c on e.course_id = c.course_id 
+join Instructor I on c.instructor_id = I.instructor_id 
+where first_name = 'Taylor' and last_name = 'Barnes';
 
 —-	3	What is the GPA of an individual student for a given semester?
 SELECT SUM(g.gpa_equivalent * e.credit_hours) / SUM(e.credit_hours)
 FROM Grades g
 JOIN Enrollments e ON g.enrollment_id = e.enrollment_id
 JOIN Courses c ON e.course_id = c.course_id
-JOIN Students s ON e.student_id = s.student_id
-WHERE s.first_name = '<student first name>' AND s.last_name = '<student last name>' AND c.semester = '<semester>';
+JOIN Student s ON e.student_id = s.studentId
+WHERE s.first_name = 'Robert' AND s.last_name = 'Baker' AND c.semester = 'Fall';
 
 —-	4	What is the cumulative GPA of an individual student?
 SELECT SUM(g.gpa_equivalent * e.credit_hours) / SUM(e.credit_hours)
 FROM Grades g
 JOIN Enrollments e ON g.enrollment_id = e.enrollment_id
 JOIN Courses c ON e.course_id = c.course_id
-JOIN Students s ON e.student_id = s.student_id
-WHERE s.first_name = '<student first name>' AND s.last_name = '<student last name>';
+JOIN Student s ON e.student_id = s.studentId
+WHERE s.first_name = 'Robert' AND s.last_name = 'Baker';
 
 -- 	5	How many students passed their courses each semester?
 SELECT c.semester, COUNT(*)
 FROM Grades g
 JOIN Enrollments e ON g.enrollment_id = e.enrollment_id
 JOIN Courses c ON e.course_id = c.course_id
-WHERE g.passing = 1
-GROUP BY c.semester
+WHERE g.passing = 'True'
+GROUP BY c.semester;
+
+-- note: g.passing was imported as a string instead of a boolean
 
 --	6	How does daily enrollment activity during last semester’s open enrollment period compare to the same period the year prior?
-SELECT TO_CHAR(e.date, 'YYYY-MM-DD'), COUNT(*)
-FROM Enrollments e
+SELECT TO_CHAR(adw.date, '2020-10-15'), COUNT(*)
+FROM AddDropWithdrawal adw
+JOIN Enrollments e ON adw.enrollment_id = e.enrollment_id
 JOIN Courses c ON e.course_id = c.course_id
-WHERE c.semester = '<last semester>'
-GROUP BY TO_CHAR(e.date, 'YYYY-MM-DD')
+WHERE c.semester = 'Winter'
+GROUP BY TO_CHAR(adw.date, '2020-10-15')
 UNION
-SELECT TO_CHAR(e.date, 'YYYY-MM-DD'), COUNT(*)
-FROM Enrollments e
+SELECT TO_CHAR(adw.date, '2021-10-15'), COUNT(*)
+FROM EddDropWithdrawal adw
 JOIN Courses c ON e.course_id = c.course_id
-WHERE c.semester = '<same period the year prior>'
-GROUP BY TO_CHAR(e.date, 'YYYY-MM-DD');
+WHERE c.semester = 'Winter'
+GROUP BY TO_CHAR(e.date, '2021-10-15');
+
+-- notes: this one is still incorrect
